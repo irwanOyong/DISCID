@@ -4,10 +4,10 @@ DISCID adalah bagian dari rangkaian program analisa kepribadian DISC yang dilaku
 
 Untuk dapat menggunakan program ini, diperlukan dependencies sebagai berikut :
 
-Python3
-MongoDB
-Library pymongo, SON, json, requests, re, dan Regex
-InaNLP Rest API yang bisa didapatkan di https://github.com/panggi/pujangga
+Python3,
+MongoDB,
+Library pymongo, SON, json, requests, re, dan Regex,
+InaNLP Rest API yang bisa didapatkan di https://github.com/panggi/pujangga,
 
 Setelah selesai melakukan instalasi kebutuhan yang diperlukan, daftar kata kunci yang terdapat di dalam folder "keywords" dapat di-import ke dalam basis data MongoDB dengan nama AMIKOM-Profiling.
 
