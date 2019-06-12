@@ -131,4 +131,3 @@ while lanjut:
 		lanjut = True
 	else:
 		lanjut = False
-# Calon presiden nomor urut 02 Prabowo Subianto menegaskan bahwa dirinya dan calon wakil presiden Sandiaga Uno telah memutuskan untuk menempuh jalur hukum terkait sengketa hasil Pemilu Presiden dan Wakil Presiden (Pilpres) 2019 yang diumumkan Komisi Pemilihan Umum (KPU) beberapa waktu lalu. Prabowo pun meminta para pendukungnya bersikap dewasa dan tenang dalam menyikapi apapun keputusan Mahkamah Konstitusi ( MK) atas sengketa tersebut. "Kita percaya pada hakim MK, apapun keputusannya kita sikapi dengan dewasa, tenang, berpikir untuk kepentingan bangsa dan negara. Itu sikap kami dan permohonan kami. Percayalah niat kami untuk kepentingan bangsa negara, umat dan rakyat," ujar Prabowo melalui video yang diterima Kompas.com, Selasa (11/6/2019).
