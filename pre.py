@@ -112,7 +112,7 @@ def test_regex():
 	loaded_doc = re.sub(r'https?:\/\/.*[\r\n]*', '', loaded_doc)
 	print(loaded_doc)
 
-print("c")
+print("DISCID adalah bagian dari rangkaian program analisa kepribadian DISC yang dilakukan oleh tim AMIKOM-Profiling dari Universitas AMIKOM Yogyakarta.")
 lanjut = True
 while lanjut:
 	textInput = input("Masukkan teks yang ingin diperiksa korespondensi DISC-nya : ")
