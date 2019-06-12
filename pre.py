@@ -10,42 +10,16 @@ from bson.regex import Regex
 def connect():
 	global client
 	global db
-	global colUser
-	global colUserValidated
-	global colTweet
-	global colFrequency
-	global colRecapFrequency
-	global colFrequencyStemmed
-	global colRecapFrequencyStemmed
-	global colKeywordSeed
-	global colKeywordFirst
-	global colKeywordSecond
 	global colKeywordSeedValidated
 	global colKeywordFirstValidated
 	global colKeywordSecondValidated
-	global colKeywordSeedValidatedStemmed
-	global colKeywordFirstValidatedStemmed
-	global colKeywordSecondValidatedStemmed
 	from pymongo import MongoClient
 	try:
 		client = MongoClient('localhost',27017)
 		db = client['AMIKOM-Profiling']
-		colUser = db.user
-		colUserValidated = db.userValidated
-		colTweet = db.tweet
-		colFrequency = db.frequency
-		colRecapFrequency = db.recapFrequency
-		colFrequencyStemmed = db.frequencyStemmed
-		colRecapFrequencyStemmed = db.recapFrequencyStemmed
-		colKeywordSeed = db.keywordSeed
-		colKeywordFirst = db.keywordFirst
-		colKeywordSecond = db.keywordSecond
 		colKeywordSeedValidated = db.keywordSeedValidated
 		colKeywordFirstValidated = db.keywordFirstValidated
 		colKeywordSecondValidated = db.keywordSecondValidated
-		colKeywordSeedValidatedStemmed = db.keywordSeedValidatedStemmed
-		colKeywordFirstValidatedStemmed = db.keywordFirstValidatedStemmed
-		colKeywordSecondValidatedStemmed = db.keywordSecondValidatedStemmed
 		print(client)
 	except:
 		print("Could not connect to MongoDB.")
