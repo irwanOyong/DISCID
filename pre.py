@@ -8,19 +8,12 @@ import re
 import time
 import pandas as pd
 from bson.regex import Regex
-from sklearn.metrics import confusion_matrix
 import matplotlib.pyplot as plt
 import numpy as np
 
 global loaded_seed
 global isrecap
-global KEY0
-global KEY1
-global KEY2
 isrecap = False
-KEY0=0
-KEY1=0
-KEY2=0
 
 def connect():
 	global client
@@ -64,229 +57,6 @@ def connect():
 		print(client)
 	except:
 		print("Could not connect to MongoDB.")
-
-def tweetCount():
-	vTotalUser = 0
-	vTotalTweet = 0
-	connect()
-	query = {}
-	projection = {}
-	projection["username"] = 1.0
-	projection["_id"] = 0.0
-	sort = [ (u"username", 1) ]
-	cursor = colUserValidated.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-	for user in cursor:
-		print(user)
-		query = {"usernameTweet":user['username']}
-		projection = {}
-		projection["username"] = 1.0
-		cursor = colTweet.find(query, projection = projection, no_cursor_timeout=True)
-		if cursor.count() != 0:
-			vTotalUser+=1
-			for user2 in cursor:
-				vTotalTweet+=1
-	print(vTotalUser, vTotalTweet)
-
-def plotCM(y_true,y_pred):
-	print(len(y_true))
-	print(len(y_pred))
-	pdy_true = pd.Series(y_true)
-	pdy_pred = pd.Series(y_pred)
-	print(pd.crosstab(pdy_true, pdy_pred, rownames=['True'], colnames=['Predicted'], margins=True))
-	labels = ["C", "D", "I", "S"]
-	cm = confusion_matrix(y_true, y_pred, labels=labels)
-	fig = plt.figure()
-	ax = fig.add_subplot(111)
-	cax = ax.matshow(cm)
-	plt.title('Confusion matrix of the classifier')
-	fig.colorbar(cax)
-	ax.set_xticklabels([''] + labels)
-	ax.set_yticklabels([''] + labels)
-	plt.xlabel('Predicted')
-	plt.ylabel('True')
-	plt.show()
-
-def compareStemmed():
-	vTrue = 0
-	vFalse = 0
-	vTotal = 0
-	y_true = []
-	y_pred = []
-	connect()
-	query = {}
-	projection = {}
-	projection["username"] = 1.0
-	projection["correspond"] = 1.0
-	projection["_id"] = 0.0
-	sort = [ (u"username", 1) ]
-	cursor = colUserValidated.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-	for user in cursor:
-		print(user)
-		query = {"username":user['username']}
-		projection = {}
-		projection["username"] = 1.0
-		projection["correspond"] = 1.0
-		cursor = colRecapFrequencyStemmed.find(query, projection = projection, no_cursor_timeout=True)
-		if cursor.count() != 0:
-			vTotal+=1
-			hit = 0
-			for user2 in cursor:
-				print(user['correspond']+' // '+user2['correspond'])
-				if user['correspond'] == user2['correspond']:
-					hit=1
-			if hit == 1:
-				vTrue+=1
-			else:
-				vFalse+=1
-			y_true.append(user['correspond'])
-			y_pred.append(user2['correspond'])
-	print(vTotal, vTrue, vFalse, vTrue/vTotal*100)
-	plotCM(y_true,y_pred)
-
-def compare():
-	vTrue = 0
-	vFalse = 0
-	vTotal = 0
-	y_true = []
-	y_pred = []
-	connect()
-	query = {}
-	projection = {}
-	projection["username"] = 1.0
-	projection["correspond"] = 1.0
-	projection["_id"] = 0.0
-	sort = [ (u"username", 1) ]
-	cursor = colUserValidated.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-	for user in cursor:
-		print(user)
-		query = {"username":user['username']}
-		projection = {}
-		projection["username"] = 1.0
-		projection["correspond"] = 1.0
-		cursor = colRecapFrequency.find(query, projection = projection, no_cursor_timeout=True)
-		if cursor.count() != 0:
-			vTotal+=1
-			hit = 0
-			for user2 in cursor:
-				print(user['correspond']+' // '+user2['correspond'])
-				if user['correspond'] == user2['correspond']:
-					hit=1
-			if hit == 1:
-				vTrue+=1
-			else:
-				vFalse+=1
-			y_true.append(user['correspond'])
-			y_pred.append(user2['correspond'])
-		else:
-			print(user['username']," tidak ditemukan")
-	print(vTotal, vTrue, vFalse, vTrue/vTotal*100)
-	plotCM(y_true,y_pred)
-
-def filter_colTweet():
-	connect()
-	query = {}
-	projection = {}
-	projection["usernameTweet"] = 1.0
-	projection["_id"] = 0.0
-	sort = [ (u"usernameTweet", 1) ]
-	cursor = colTweet.find(query, projection = projection, no_cursor_timeout=True)
-	try:
-		for user in cursor:
-			print("ketemu :",user)
-			query = {"screen_name":user["usernameTweet"]}
-			projection = {}
-			projection["screen_name"] = 1.0
-			sort = [ (u"screen_name", 1) ]
-			cursor = colUser.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-			if cursor.count() == 0:
-				print("hapus")
-				qFrom = { "usernameTweet":user["usernameTweet"]}
-				result = colTweet.delete_many(qFrom)
-				print(result.deleted_count," documents deleted")
-			else:
-				print("tidak hapus")
-	finally:
-	    client.close()	
-
-def migrate():
-	connect()
-	text = open('/home/airone/AMIKOM-Profiling/UserListDone.txt','r+')
-	for user in text:
-		user = re.sub('[\n]+', '', user)
-		print(user)
-		query = {"screen_name":user}
-		projection = {}
-		projection["avatar"] = 1.0
-		projection["name"] = 1.0
-		projection["screen_name"] = 1.0
-		projection["ID"] = 1.0
-		projection["_id"] = 0.0
-		sort = [ (u"screen_name", 1) ]
-		cursor = colUser.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-		try:
-			for user in cursor:
-				print("ketemu :",user)
-				result = colUser2.insert_one({"avatar":user["avatar"],"name":user["name"],"screen_name":user["screen_name"],"ID":user["ID"]})
-				query = {"usernameTweet":user["screen_name"]}
-				projection = {}
-				projection["user_id"] = 1.0
-				projection["usernameTweet"] = 1.0
-				projection["ID"] = 1.0
-				projection["text"] = 1.0
-				projection["is_reply"] = 1.0
-				projection["datetime"] = 1.0
-				sort = [ (u"ID", 1) ]
-				cursor = colTweet.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-				for tweet in cursor:
-					print(user["screen_name"]+" / "+tweet["ID"])
-					result = colTweet2.insert_one({"user_id":tweet["user_id"],"usernameTweet":tweet["usernameTweet"],"ID":tweet["ID"],"text":tweet["text"],"is_reply":tweet["is_reply"],"datetime":tweet["datetime"]})
-		finally:
-		    client.close()			
-
-def migrate_tweet():
-	connect()
-	query = {}
-	projection = {}
-	projection["screen_name"] = 1.0
-	projection["_id"] = 0.0
-	sort = [ (u"screen_name", 1) ]
-	cursor = colUser2.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-	try:
-		for user in cursor:
-			query = {"usernameTweet":user["screen_name"]}
-			projection = {}
-			projection["user_id"] = 1.0
-			projection["ID"] = 1.0
-			projection["text"] = 1.0
-			projection["is_reply"] = 1.0
-			projection["datetime"] = 1.0
-			# projection["_id"] = 0.0
-			sort = [ (u"ID", 1) ]
-			cursor = colTweet.find(query, projection = projection, sort = sort, no_cursor_timeout=True)
-			for tweet in cursor:
-				print(user["screen_name"]+" / "+tweet["ID"])
-				result = colTweet2.insert_one({"user_id":tweet["user_id"],"ID":tweet["ID"],"text":tweet["text"],"is_reply":tweet["is_reply"],"datetime":tweet["datetime"]})
-
-	finally:
-	    client.close()			
-
-def generate_text(): #generate raw text from ID-DepreSD.collection
-	connect()
-	query = {}
-	projection = {}
-	projection["string"] = 1.0
-	projection["_id"] = 0.0
-	sort = [ (u"usernameTweet", 1), (u"datetime", 1) ]
-	cursor = colTweet.find(query, projection = projection, sort = sort)
-	try:
-		with open('/home/airone/ID-DepreSD/raw-data.txt','a') as outfile:
-			for doc in cursor:
-				doc = json.dumps(doc)
-				loaded_doc = json.loads(doc)
-				json.dump(loaded_doc['string'], outfile)
-				outfile.write('\n')
-	finally:
-	    client.close()
 
 def recapWeighted():
 	connect()
@@ -395,10 +165,6 @@ def run():
 	start_time = time.time()
 	urut = 1
 	connect()
-	# with open('/home/airone/ID-DepreSD/scoring-result.txt','w') as outfile:
-	# 	outfile.write("uname,depressed,stdscore,stdcount,stdcount0,stdscorecount,stdscorecount0,twtscore,twtcount,twtcount0,"+
-	# 		"twtscorecount,twtscorecount0")
-	# 	outfile.write('\n')
 	query = {}
 	projection = {}
 	projection["screen_name"] = 1.0
@@ -425,8 +191,6 @@ def run():
 				print("skip ",loaded_user)
 				urut = urut + 1
 				continue
-			# if urut == 2:
-			# 	quit()
 	finally:
 	    client.close()
 	cursor.close()
@@ -436,9 +200,6 @@ def twitterProc(uname):
 	#connect()
 	global twtcount
 	global prnlist
-	global KEY0
-	global KEY1
-	global KEY2
 	query = {"usernameTweet":uname}
 	projection = {}
 	projection["text"] = 1.0
@@ -498,25 +259,19 @@ def twitterProc(uname):
 					regex = re.compile('^'+kata+'$')
 					cursor = colKeywordSeedValidated.find({"seed": regex})
 					if cursor.count() == 1:
-						KEY0=KEY0+1
 						# save_frequency(kata)
-						# print("  found KEY0: ",kata)
 						for doc in cursor:
 							# print("correspond: ",doc["correspond"])
 							saveFrequency(uname,kata,doc["correspond"],level="seed")
 					else:
 						cursor = colKeywordFirstValidated.find({"first": regex})
 						if cursor.count() == 1:
-							KEY1=KEY1+1
-							# print("  found KEY1: ",kata)
 							for doc in cursor:
 								# print("correspond: ",doc["correspond"])
 								saveFrequency(uname,kata,doc["correspond"],level="first")
 						else:
 							cursor = colKeywordSecondValidated.find({"second": regex})
 							if cursor.count() == 1:
-								KEY2=KEY2+1
-								# print("  found KEY2: ",kata)
 								for doc in cursor:
 									# print("correspond: ",doc["correspond"])
 									saveFrequency(uname,kata,doc["correspond"],level="second")
@@ -681,9 +436,6 @@ def twitterProcStemmed(uname):
 	#connect()
 	global twtcount
 	global prnlist
-	global KEY0
-	global KEY1
-	global KEY2
 	query = {"usernameTweet":uname}
 	projection = {}
 	projection["text"] = 1.0
@@ -748,25 +500,19 @@ def twitterProcStemmed(uname):
 					regex = re.compile('^'+kata+'$')
 					cursor = colKeywordSeedValidatedStemmed.find({"seed": regex})
 					if cursor.count() == 1:
-						KEY0=KEY0+1
 						# save_frequency(kata)
-						# print("  found KEY0: ",kata)
 						for doc in cursor:
 							# print("correspond: ",doc["correspond"])
 							saveFrequencyStemmed(uname,kata,doc["correspond"],level="seed")
 					else:
 						cursor = colKeywordFirstValidatedStemmed.find({"first": regex})
 						if cursor.count() == 1:
-							KEY1=KEY1+1
-							# print("  found KEY1: ",kata)
 							for doc in cursor:
 								# print("correspond: ",doc["correspond"])
 								saveFrequencyStemmed(uname,kata,doc["correspond"],level="first")
 						else:
 							cursor = colKeywordSecondValidatedStemmed.find({"second": regex})
 							if cursor.count() == 1:
-								KEY2=KEY2+1
-								# print("  found KEY2: ",kata)
 								for doc in cursor:
 									# print("correspond: ",doc["correspond"])
 									saveFrequencyStemmed(uname,kata,doc["correspond"],level="second")
